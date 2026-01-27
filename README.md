@@ -1,3 +1,9 @@
+# Arquitetura da Solução
+
+<div align="center">
+ <img width="600" src="https://github.com/PauloLimafps/plugin_LMS/blob/main/Images/workflow_n8n.png?raw=true" alt="Diagrama do Workflow n8n" />
+</div>
+
 # moodle-block_openai_chat
 <img align="right" src="https://github.com/Limekiller/moodle-block_openai_chat/assets/33644013/21f73adc-5bd4-4539-999b-a3b0a83736e0" />
 
@@ -9,9 +15,9 @@ Para começar, você precisará de um endpoint de Webhook configurado (ex: n8n, 
 # Configurações globais do bloco
 As configurações globais do bloco podem ser encontradas indo em Administração do Site > Plugins > Blocos > OpenAI Chat Block. As opções são:
 
-- Webhook URL: (Novo) Aqui você adiciona a URL do seu fluxo no n8n (método POST) que receberá as mensagens.
+- Webhook URL: Aqui você adiciona a URL do seu fluxo no n8n (método POST) que receberá as mensagens.
 
-- Security Token: (Novo) Um token de segurança opcional que será enviado no payload para validar a requisição no seu n8n.
+- Security Token: Um token de segurança opcional que será enviado no payload para validar a requisição no seu n8n.
 
 - Restrict chat usage to logged-in users: Se esta caixa estiver marcada, apenas usuários logados poderão usar a caixa de bate-papo.
 
