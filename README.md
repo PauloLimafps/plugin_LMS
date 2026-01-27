@@ -54,3 +54,88 @@ Você deve configurar o seu fluxo no n8n para:
 - Processar a lógica (ex: consultar Banco Vetorial/RAG).
 
 - Devolver um JSON com a resposta no campo output ou message.
+
+### Workflow n8n: Assistente Acadêmico com RAG e Debounce
+Este repositório contém o arquivo JSON do workflow do n8n responsável por processar as dúvidas dos alunos vindas do Moodle. Ele atua como o "cérebro" da operação, gerenciando filas de mensagens, memória de conversação e recuperação de informações (RAG).
+
+📋 Visão Geral da Arquitetura
+O workflow foi desenhado para lidar com comportamento humano real em chats (várias mensagens curtas seguidas) e garantir respostas baseadas em documentos oficiais.
+
+Principais Funcionalidades:
+Buffer de Mensagens (Debounce via Redis): Agrupa mensagens enviadas em rápida sucessão (ex: "Oi", "tudo bem?", "qual a média?") em um único bloco de contexto antes de enviar para a IA.
+
+Injeção de Contexto: Processa metadados do aluno (cursos matriculados, ID, nome) para personalizar o atendimento.
+
+RAG (Retrieval-Augmented Generation): Consulta um banco vetorial (Supabase) via Edge Function para buscar regras acadêmicas específicas.
+
+Memória Persistente: Utiliza PostgreSQL para manter o histórico da conversa (session_id baseado no ID do usuário).
+
+🛠️ Pré-requisitos
+Para importar e rodar este workflow, você precisa das seguintes instâncias e credenciais configuradas no n8n:
+
+1. Serviços Externos
+Redis: Necessário para o sistema de fila/buffer de mensagens.
+
+PostgreSQL: Utilizado pelo LangChain para armazenar o histórico do chat (Chat Memory).
+
+Supabase: Projeto configurado com pgvector e uma Edge Function para hybrid_search.
+
+OpenAI: Chave de API para o modelo gpt-4o-mini (ou superior).
+
+2. Credenciais no n8n
+Certifique-se de criar as seguintes credenciais no painel do n8n:
+
+OpenAi account
+
+Postgres RAG
+
+Redis account
+
+⚙️ Fluxo Detalhado dos Nós
+1. Entrada e Normalização
+Webhook (POST /receber-mensagem): Ponto de entrada. Recebe o JSON enviado pelo plugin do Moodle.
+
+Edit Fields: Normaliza e sanitiza os dados de entrada.
+
+Extrai: pergunta, usuario_user, usuario_id, email, unique_id.
+
+Formata Arrays: Converte a lista de objetos student_enrollments em listas simples de Nomes e IDs para uso no prompt.
+
+2. O "Debounce" (Lógica Redis)
+Esta seção impede que a IA seja acionada múltiplas vezes se o aluno digitar frases picadas.
+
+Lista Temp (Redis Push): Adiciona a mensagem atual em uma lista temporária no Redis usando o unique_id do usuário como chave.
+
+Wait1 (6 segundos): Aguarda um breve período para ver se chegam mais mensagens.
+
+Buscar Lista Temp: Recupera todas as mensagens acumuladas.
+
+Condicional (IF): Verifica: "Esta execução é referente à ÚLTIMA mensagem enviada?"
+
+Se SIM: Prossegue para processar o bloco inteiro.
+
+Se NÃO: Encerra a execução (o nó Liberar PHP devolve um JSON de controle para não travar o Moodle).
+
+Mensagem Final: Junta todas as frases acumuladas em um único parágrafo.
+
+Deletar Lista: Limpa o Redis para a próxima interação.
+
+3. O Agente de IA (LangChain)
+AI Agent: O cérebro da operação.
+
+System Prompt: Define a persona ("Assistente Virtual Educado") e regras estritas: só usar a ferramenta RAG se houver uma "Dúvida Clara". Caso contrário, apenas cumprimenta ou pede detalhes.
+
+Contexto Injetado: O prompt recebe dinamicamente o Curso e as Mensagens acumuladas.
+
+Postgres Chat Memory: Garante que a IA lembre do que foi dito anteriormente na sessão.
+
+OpenAI Chat Model: Configurado com temperatura baixa (0.2) para evitar alucinações e manter o rigor nas regras acadêmicas.
+
+4. Ferramentas (Tools)
+RAG Medicina (HTTP Request):
+
+Faz uma chamada POST para o Supabase.
+
+Endpoint: /functions/v1/hybrid_search.
+
+Payload: Envia a pergunta do usuário vetorizada para buscar trechos relevantes nos manuais.

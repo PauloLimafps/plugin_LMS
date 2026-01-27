@@ -1,0 +1,537 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('última mensagem').item.json.mensagens }}",
+        "options": {
+          "systemMessage": "=Você é um Assistente Virtual de Atendimento ao Estudante, educado, receptivo e objetivo.\nSeu papel é ajudar o aluno a consultar o Manual de Avaliação quando ele tiver uma DÚVIDA CLARA.\nSua única fonte de verdade é a ferramenta de busca (RAG / Vector Store).\nNunca responda com base em conhecimento próprio.\nVocê mantém o estado da conversa e NÃO deve pedir novamente informações que já foram informadas.\n\nDADOS DISPONÍVEIS (sempre válidos e atualizados):\n- Curso: {{ $('Edit Fields').item.json.curso }}\n- Mensagem atual do estudante: {{ $('última mensagem').item.json.mensagens }}\n\n\nOBJETIVO DO ATENDIMENTO:\nIdentificar se o estudante fez uma DÚVIDA CLARA sobre o Manual de Avaliação.\nUma \"dúvida clara\" é uma pergunta ou afirmação específica sobre regras, critérios, procedimentos ou conteúdos do Manual, como:\n- \"Qual a nota mínima para aprovação?\"\n- \"Como funciona a avaliação de HA no 6º período?\"\n- \"O que acontece se eu reprovar na prova final?\"\n\nFrases vagas como “oi”, “bom dia”, “tenho dúvidas”, “preciso de ajuda”, “tenho uma dúvida”, “deixe me pensar”, “quero saber sobre o manual” NÃO são dúvidas claras — trate-as como indicações de intenção e guie o usuário a especificar a dúvida exata.\n\nREGRAS DE COMPORTAMENTO (MUITO IMPORTANTE):\n• NÃO presuma intenção nem antecipe respostas.\n• NUNCA presuma o significado de siglas, abreviações, nomes de disciplinas ou termos (ex.: HA, HAM, etc.).\n  → Se a sigla gerar confusão, pergunte gentilmente para esclarecer (ex.: \"O que significa HA na sua dúvida? Pode explicar o contexto?\").\n• Mensagens de cumprimento ou vagas → apenas cumprimente e guie: \"Ótimo! Qual é a sua dúvida específica sobre o Manual de Avaliação?\"\n• NÃO acione a ferramenta de busca sem uma dúvida explícita e clara.\n\nCOLETA DE INFORMAÇÕES:\n- Se NÃO houver dúvida clara: Cumprimente e peça para especificar a dúvida.\n- Se houver indicação vaga de dúvida (ex.: \"Tenho dúvidas\"): Peça para detalhar a dúvida exata antes de prosseguir.\n- Se houver dúvida clara: Prossiga diretamente para a busca (pois período, ano e curso já estão disponíveis).\n\nUSO DA FERRAMENTA (RAG):\n⚠️ Só utilize a ferramenta quando TODAS as condições abaixo forem verdadeiras:\n- Existe uma dúvida clara e específica sobre o Manual de Avaliação\n- Curso, período e ano de ingresso já identificados (sempre disponíveis)\n\nConsulta a ser enviada (componha exatamente assim):\n\"Dúvida do estudante: {{ $('última mensagem').item.json.mensagens | trim }} Curso: {{ $('Edit Fields').item.json.curso }}\"\n\nNUNCA use mensagens vagas ou genéricas como consulta. Sempre inclua a dúvida literal + contexto do estudante.\n\nRESPOSTA AO ESTUDANTE:\nBaseie-se EXCLUSIVAMENTE no retorno da ferramenta.\nRepita a dúvida do estudante de forma literal na resposta (sem expandir siglas ou interpretar).\nSe o manual trouxer regras gerais, elas se aplicam ao estudante.\nSe não houver nenhuma informação aplicável, responda exatamente:\n\"Não encontrei essa informação específica no Manual de Avaliação\"\n\nNunca invente regras. Nunca complemente com suposições. Nunca expanda siglas ou termos."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -3296,
+        -3696
+      ],
+      "id": "573769fc-c25b-417f-9b56-c56caaca6854",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -3424,
+        -3440
+      ],
+      "id": "4ea6b9a4-6c7c-4300-9090-f52c232ff02c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0hHASIrMIU0l00h4",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.unique_id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -3200,
+        -3424
+      ],
+      "id": "2963277e-4353-48e9-a179-f2e9b151ac1b",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "7QAW70Km77PCpeXS",
+          "name": "Postgres RAG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "receber-mensagem",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -5568,
+        -3584
+      ],
+      "id": "7ed5aae1-5d7c-400f-8f38-5e860a591461",
+      "name": "Webhook",
+      "webhookId": "ecf98b9c-67bc-4880-b7a2-ba1c60388a02"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ output: $json.output }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -2880,
+        -3696
+      ],
+      "id": "6268f548-8e6c-4dc2-8884-3fb587cac3c8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Use esta ferramenta SOMENTE quando o estudante fizer uma dúvida explícita sobre o Manual de Avaliação.\nNÃO utilize esta ferramenta para cumprimentos, coleta de informações ou mensagens sem pergunta clara.\nA resposta final DEVE ser baseada exclusivamente no retorno desta ferramenta.\n",
+        "method": "POST",
+        "url": "https://vcfyrilogttgfkvqqova.supabase.co/functions/v1/hybrid_search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sb_publishable_tvKXByMD4lm2agrTdHVLLQ_4WZuLkFx"
+            },
+            {
+              "name": "apikey",
+              "value": "sb_publishable_tvKXByMD4lm2agrTdHVLLQ_4WZuLkFx"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `A pergunta do estudante`, 'string') }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        -3008,
+        -3440
+      ],
+      "id": "9ec3b2d0-9045-4e82-abef-4a8b47115eea",
+      "name": "RAG Medicina"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.unique_id }}",
+        "messageData": "={{ $json.pergunta }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -5088,
+        -3584
+      ],
+      "id": "f22f9af3-c784-48e3-9f55-dfdd2b6430aa",
+      "name": "Lista Temp",
+      "credentials": {
+        "redis": {
+          "id": "AoMwvT6I4OGlhK5S",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 6
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -4832,
+        -3584
+      ],
+      "id": "c8c911ad-05ab-4473-a2fe-6427aa4a0e84",
+      "name": "Wait1",
+      "webhookId": "faf30b98-5a3c-4a72-b947-5f5359d26fd3"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "mensagens",
+        "key": "={{ $json.unique_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4544,
+        -3584
+      ],
+      "id": "b080680c-2d5f-4349-8e5f-6b61d9f66b44",
+      "name": "Buscar Lista Temp",
+      "credentials": {
+        "redis": {
+          "id": "AoMwvT6I4OGlhK5S",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1ead5301-cec4-4988-9b52-48ce9e4846e4",
+              "leftValue": "={{ $json.mensagens.last() }}",
+              "rightValue": "={{ $('Wait1').item.json.pergunta }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -4272,
+        -3584
+      ],
+      "id": "a4b9e3bd-4e94-4f8b-afdb-1cc430053612",
+      "name": "última mensagem"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Wait1').item.json.unique_id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -3568,
+        -3680
+      ],
+      "id": "13133164-248e-4b73-bc4f-127f69a234a0",
+      "name": "Deletar Lista",
+      "credentials": {
+        "redis": {
+          "id": "AoMwvT6I4OGlhK5S",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37bd83a0-7e8a-4854-9bd0-8b8e67b45c98",
+              "name": "mensagens",
+              "value": "={{ $json.mensagens.join(\" \") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3808,
+        -3680
+      ],
+      "id": "5e5bf905-a5f5-493f-9aa0-ca4761383cfa",
+      "name": "mensagem final"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ignorar\": true\n}",
+        "options": {}
+      },
+      "id": "ba1d277a-56c9-4d91-adbd-e424c1ba8e66",
+      "name": "Liberar PHP (Ignorar)1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -3808,
+        -3456
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3fa63c33-c90f-45c8-8d51-c9895331678a",
+              "name": "pergunta",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "13a11e10-79c6-418c-896a-4b2b77b820ec",
+              "name": "usuario_user",
+              "value": "={{ $json.body.user.fullname }}",
+              "type": "string"
+            },
+            {
+              "id": "567ac041-3c8f-4557-adc3-aab09e48673a",
+              "name": "usuario_id",
+              "value": "={{ $json.body.user.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a0cfb6e3-6657-41b0-b89f-546277c988a3",
+              "name": "email",
+              "value": "={{ $json.body.user.email }}",
+              "type": "string"
+            },
+            {
+              "id": "24b733c7-85af-4aab-b7a6-50875912a945",
+              "name": "unique_id",
+              "value": "={{ $json.body.user.firstaccess }}",
+              "type": "string"
+            },
+            {
+              "id": "cb3393a6-01ad-4f25-8169-48bdfba3ca1c",
+              "name": "curso",
+              "value": "={{ $json.body.student_enrollments.map(c => c.nome) }}",
+              "type": "array"
+            },
+            {
+              "id": "5a16f8e1-8da2-4622-b5f9-bc13d076d137",
+              "name": "id_curso",
+              "value": "={{ $json.body.student_enrollments.map(c => c.id) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5328,
+        -3584
+      ],
+      "id": "d2281003-7407-41c1-a085-336d41b9a43f",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Medicina": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lista Temp": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Buscar Lista Temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lista Temp": {
+      "main": [
+        [
+          {
+            "node": "última mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "última mensagem": {
+      "main": [
+        [
+          {
+            "node": "mensagem final",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Liberar PHP (Ignorar)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deletar Lista": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mensagem final": {
+      "main": [
+        [
+          {
+            "node": "Deletar Lista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Lista Temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "headers": {
+          "host": "localhost:5678",
+          "user-agent": "MoodleBot/4.5 (+http://localhost/moodle)",
+          "accept": "*/*",
+          "accept-encoding": "deflate, gzip",
+          "content-type": "application/json",
+          "content-length": "269"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "message": "olá\n",
+          "user": {
+            "id": "7",
+            "fullname": "Aluno 2",
+            "email": "Aluno_2@gmail.com",
+            "firstaccess": "1768223035"
+          },
+          "page_context": {
+            "course_id": "1",
+            "course_name": "Moodle_AVA",
+            "course_code": "Moodle"
+          },
+          "student_enrollments": [
+            {
+              "id": "2",
+              "nome": "Medicina",
+              "codigo": "MED"
+            }
+          ]
+        },
+        "webhookUrl": "http://localhost:5678/webhook-test/receber-mensagem",
+        "executionMode": "test"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b075c7408c2c5ac80a538ef0da7bc93637295b001b012d59403203c8cc6f1912"
+  }
+}
