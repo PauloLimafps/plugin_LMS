@@ -139,3 +139,5 @@ Faz uma chamada POST para o Supabase.
 Endpoint: /functions/v1/hybrid_search.
 
 Payload: Envia a pergunta do usuário vetorizada para buscar trechos relevantes nos manuais.
+
+![Diagrama do Workflow n8n](imagens/workflow_n8n.png)
