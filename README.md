@@ -142,4 +142,4 @@ Payload: Envia a pergunta do usuário vetorizada para buscar trechos relevantes 
 
 ![Diagrama do Workflow n8n](imagens/workflow_n8n.png)
 
-<img align="right" width="450" src="imagens/workflow_n8n.png" alt="Diagrama do Workflow n8n" />
+<img align="right" width="450" src="https://github.com/PauloLimafps/plugin_LMS/blob/main/Images/workflow_n8n.png" alt="Diagrama do Workflow n8n" />
