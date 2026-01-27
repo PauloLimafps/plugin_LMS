@@ -85,9 +85,6 @@ class chat extends \block_openai_chat\completion {
         // =================================================================
         // 4. CONTEXTO DO ALUNO (Quem é ele?)
         // =================================================================
-        
-        // A. Ano de Ingresso Estimado
-        $ano_ingresso = date('Y', $USER->firstaccess);
 
         // B. Lista de Cursos Matriculados (A Solução Definitiva)
         // Se o contexto da página falhar (ID 1), o n8n usará esta lista para saber a turma real.
@@ -97,7 +94,6 @@ class chat extends \block_openai_chat\completion {
         $my_courses = enrol_get_users_courses($USER->id, true, 'id, fullname, shortname');
         
         foreach ($my_courses as $c) {
-            // Não enviamos o curso "Site Home" (Frontpage), pois não é disciplina
             if ($c->id != 1) {
                 $cursos_matriculados[] = [
                     'id' => $c->id,
@@ -119,7 +115,6 @@ class chat extends \block_openai_chat\completion {
                 'fullname' => fullname($USER),
                 'email' => $USER->email,
                 'firstaccess' => $USER->firstaccess,
-                'ano_ingresso_estimado' => $ano_ingresso
             ],
             
             // Onde ele está agora (Contexto da Página)
