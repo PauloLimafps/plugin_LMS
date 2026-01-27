@@ -3,7 +3,7 @@
 O plugin opera delegando a lógica para o n8n. Abaixo, a visão técnica dos componentes envolvidos:
 
 <div align="center">
- <img width="600" src="https://github.com/PauloLimafps/plugin_LMS/blob/main/Images/Diagrama%20de%20Sequ%C3%AAncia%20(O%20Passo%20a%20Passo).png" alt="Diagrama do Workflow n8n" />
+ <img width="600" src="https://github.com/PauloLimafps/plugin_LMS/blob/main/Images/Diagrama%20de%20Arquitetura%20(Vis%C3%A3o%20T%C3%A9cnica).png" alt="Diagrama do Workflow n8n" />
 </div>
 
 # moodle-block_openai_chat
