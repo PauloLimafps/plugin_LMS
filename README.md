@@ -10,7 +10,7 @@ O plugin opera delegando a lógica para o n8n. Abaixo, a visão técnica dos com
 <img align="right" src="https://github.com/Limekiller/moodle-block_openai_chat/assets/33644013/21f73adc-5bd4-4539-999b-a3b0a83736e0" />
 
 ### Bloco de chat com IA para Moodle (Versão Webhook/n8n)
-Este bloco permite que os usuários do seu Moodle obtenham suporte via chat 24/7. Esta versão foi modificada para atuar como um conector (Thin Client), enviando as mensagens para um serviço externo (como n8n) em vez de conectar diretamente à API da OpenAI.
+Este bloco permite que os usuários do seu Moodle obtenham suporte via chat 24/7. Esta versão foi modificada para atuar como um conector, enviando as mensagens para um serviço externo (como n8n) em vez de conectar diretamente à API da OpenAI.
 
 Para começar, você precisará de um endpoint de Webhook configurado (ex: n8n, Zapier ou servidor próprio) para receber e processar as mensagens.
 
@@ -46,14 +46,14 @@ O payload enviado para o seu n8n seguirá este formato:
 
 - Mensagem: O texto digitado pelo usuário.
 
-- Contexto do Usuário: ID, Nome, Email, Data de Cadastro e Ano de Ingresso Estimado.
+- Contexto do Usuário: ID, Nome, Email.
 
--Contexto da Página: O ID e Nome do curso onde o bloco está sendo visualizado (se aplicável).
+- Contexto da Página: O ID e Nome do curso onde o bloco está sendo visualizado.
 
 - Matrículas do Aluno (Student Enrollments): Uma lista completa de todos os cursos em que o usuário está matriculado, permitindo que a IA saiba o contexto acadêmico do aluno mesmo que ele esteja na página inicial.
 
 ### Sobre o Prompt e Respostas
-Nesta versão modificada, a influência sobre a "persona" da IA, a "Fonte da Verdade" (Source of Truth) e o formato das respostas não é mais configurada no Moodle.
+Nesta versão modificada, a influência sobre a persona da IA, a "Fonte da Verdade" e o formato das respostas não é mais configurada no Moodle.
 
 Você deve configurar o seu fluxo no n8n para:
 
@@ -74,10 +74,11 @@ Você deve configurar o seu fluxo no n8n para:
 Este repositório contém o arquivo JSON do workflow do n8n responsável por processar as dúvidas dos alunos vindas do Moodle. Ele atua como o "cérebro" da operação, gerenciando filas de mensagens, memória de conversação e recuperação de informações (RAG).
 
 # Visão Geral da Arquitetura
-O workflow foi desenhado para lidar com comportamento humano real em chats (várias mensagens curtas seguidas) e garantir respostas baseadas em documentos oficiais.
+O workflow foi desenhado para lidar com comportamento humano real em chats e garantir respostas baseadas em documentos oficiais.
 
-- Principais Funcionalidades:
-Buffer de Mensagens (Debounce via Redis): Agrupa mensagens enviadas em rápida sucessão (ex: "Oi", "tudo bem?", "qual a média?") em um único bloco de contexto antes de enviar para a IA.
+### Principais Funcionalidades:
+
+- Buffer de Mensagens (via Redis): Agrupa mensagens enviadas em rápida sucessão (ex: "Oi", "tudo bem?", "qual a média?") em um único bloco de contexto antes de enviar para a IA.
 
 - Injeção de Contexto: Processa metadados do aluno (cursos matriculados, ID, nome) para personalizar o atendimento.
 
@@ -89,6 +90,7 @@ Buffer de Mensagens (Debounce via Redis): Agrupa mensagens enviadas em rápida s
 Para importar e rodar este workflow, você precisa das seguintes instâncias e credenciais configuradas no n8n:
 
 1. Serviços Externos
+
 - Redis: Necessário para o sistema de fila/buffer de mensagens.
 
 - PostgreSQL: Utilizado pelo LangChain para armazenar o histórico do chat (Chat Memory).
