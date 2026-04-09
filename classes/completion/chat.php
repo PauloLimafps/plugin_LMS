@@ -24,9 +24,11 @@ defined('MOODLE_INTERNAL') || die;
  * Classe customizada para conectar ao n8n (Assistente Acadêmico).
  * Versão Final: Com Injeção de Contexto, Lista de Matrículas e Detecção de Referer.
  */
-class chat extends \block_openai_chat\completion {
+class chat extends \block_openai_chat\completion
+{
 
-    public function __construct($model, $message, $history, $block_settings, $thread_id = null) {
+    public function __construct($model, $message, $history, $block_settings, $thread_id = null)
+    {
         // Mantemos o construtor original para compatibilidade
         parent::__construct($model, $message, $history, $block_settings);
     }
@@ -34,7 +36,8 @@ class chat extends \block_openai_chat\completion {
     /**
      * Método principal chamado pelo chat.js
      */
-    public function create_completion($context) {
+    public function create_completion($context)
+    {
         global $USER, $COURSE, $DB;
 
         // =================================================================
@@ -47,7 +50,7 @@ class chat extends \block_openai_chat\completion {
         // 2. CONFIGURAÇÕES
         // =================================================================
         $webhook_url = get_config('block_openai_chat', 'webhookurl');
-        
+
         if (empty($webhook_url)) {
             return [
                 "id" => "error",
@@ -58,7 +61,7 @@ class chat extends \block_openai_chat\completion {
         // =================================================================
         // 3. CAPTURA DO CONTEXTO DA PÁGINA (Onde o aluno está clicando?)
         // =================================================================
-        
+
         $course_id_to_use = 0;
 
         // TENTATIVA A: O jeito oficial (Parâmetro na requisição)
@@ -69,12 +72,12 @@ class chat extends \block_openai_chat\completion {
         if ((empty($course_id_to_use) || $course_id_to_use == 1) && isset($_SERVER['HTTP_REFERER'])) {
             $referer_url = $_SERVER['HTTP_REFERER'];
             $query_str = parse_url($referer_url, PHP_URL_QUERY);
-            
+
             if ($query_str) {
                 parse_str($query_str, $query_params);
                 // Se a URL original tem "id=XX", usamos esse ID com prioridade!
                 if (isset($query_params['id']) && is_numeric($query_params['id'])) {
-                    $course_id_to_use = (int)$query_params['id'];
+                    $course_id_to_use = (int) $query_params['id'];
                 }
             }
         }
@@ -98,10 +101,10 @@ class chat extends \block_openai_chat\completion {
         // B. Lista de Cursos Matriculados (A Solução Definitiva)
         // Se o contexto da página falhar (ID 1), o n8n usará esta lista para saber a turma real.
         $cursos_matriculados = [];
-        
+
         // Busca cursos onde o usuário está inscrito, retornando apenas campos leves
         $my_courses = enrol_get_users_courses($USER->id, true, 'id, fullname, shortname');
-        
+
         foreach ($my_courses as $c) {
             if ($c->id != 1) {
                 $cursos_matriculados[] = [
@@ -117,7 +120,7 @@ class chat extends \block_openai_chat\completion {
         // =================================================================
         $payload = [
             'message' => $this->message,
-            
+
             // Dados do Usuário
             'user' => [
                 'id' => $USER->id,
@@ -125,14 +128,14 @@ class chat extends \block_openai_chat\completion {
                 'email' => $USER->email,
                 'firstaccess' => $USER->firstaccess,
             ],
-            
+
             // Onde ele está agora (Contexto da Página)
             'page_context' => [
                 'course_id' => $real_course->id,
                 'course_name' => $real_course->fullname,
                 'course_code' => $real_course->shortname
             ],
-            
+
             // O que ele estuda (Contexto Acadêmico Completo)
             'student_enrollments' => $cursos_matriculados
         ];

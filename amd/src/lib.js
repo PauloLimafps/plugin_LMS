@@ -84,7 +84,8 @@ export const init = (data) => {
             errorString = results[1];
         });
     });
-}
+
+
 
 /**
  * Add a message to the chat UI
