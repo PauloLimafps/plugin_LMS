@@ -5,10 +5,19 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace block_openai_chat\completion;
 
 use block_openai_chat\completion;
+use block_openai_chat\jwt_helper;
 defined('MOODLE_INTERNAL') || die;
 
 /**
@@ -129,11 +138,25 @@ class chat extends \block_openai_chat\completion {
         ];
 
         // =================================================================
-        // 6. ENVIO PARA O N8N (cURL)
+        // 6. AUTENTICAÇÃO E ENVIO PARA O FASTAPI (cURL)
         // =================================================================
         $curl = new \curl();
+
+        // Gerar o JWT assinado
+        try {
+            $jwt = jwt_helper::generate($USER->id);
+        } catch (\Exception $e) {
+            return [
+                "id" => "error",
+                "message" => "Erro de Autenticação: " . $e->getMessage()
+            ];
+        }
+
         $options = [
-            'CURLOPT_HTTPHEADER' => ['Content-Type: application/json'],
+            'CURLOPT_HTTPHEADER' => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $jwt
+            ],
             'CURLOPT_TIMEOUT' => 60, // Timeout generoso para a IA pensar
             'CURLOPT_CONNECTTIMEOUT' => 10
         ];
@@ -146,7 +169,22 @@ class chat extends \block_openai_chat\completion {
         if ($errno) {
             return [
                 "id" => "curl_error",
-                "message" => "Erro de conexão com o Assistente Inteligente. Tente novamente."
+                "message" => "Erro de conexão com o Assistente Inteligente. Verifique se o servidor FastAPI está rodando."
+            ];
+        }
+
+        // Verifica Status HTTP (especialmente 401 para token inválido)
+        $http_status = $curl->get_info()['http_code'] ?? 0;
+        if ($http_status === 401) {
+            return [
+                "id" => "auth_error",
+                "message" => "Erro de Autenticação: Token inválido ou expirado. Verifique a JWT Secret."
+            ];
+        }
+        if ($http_status >= 500) {
+            return [
+                "id" => "server_error",
+                "message" => "Erro no Servidor: O assistente encontrou um problema interno."
             ];
         }
 
@@ -176,7 +214,7 @@ class chat extends \block_openai_chat\completion {
 
         // Retorna no formato exato que o plugin espera
         return [
-            "id" => uniqid('n8n_'),
+            "id" => uniqid('rag_'),
             "message" => $bot_message
         ];
     }

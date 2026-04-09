@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings
+ * English strings
  *
  * @package    block_openai_chat
- * @copyright  2024 Bryce Yoder <me@bryceyoder.com>
+ * @copyright  2022 Bryce Yoder <me@bryceyoder.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$string['pluginname'] = 'Assistente Acadêmico (RAG)';
+$string['pluginname'] = 'Assistente RAG';
+$string['openai_chat'] = 'Assistente RAG';
 $string['openai_chat:addinstance'] = 'Adicionar novo bloco do Assistente';
 $string['openai_chat:myaddinstance'] = 'Adicionar novo bloco do Assistente no Painel';
 
 // Configurações (Essas chaves devem bater com o settings.php)
-$string['headerconfig'] = 'Conexão com n8n';
-$string['descconfig'] = 'Configure a conexão com o orquestrador de automação (n8n).';
-$string['webhookurl'] = 'URL do Webhook';
-$string['securitytoken'] = 'Token de Acesso';
+$string['headerconfig'] = 'Conexão com o Orquestrador RAG';
+$string['descconfig'] = 'Configure a conexão com o servidor FastAPI.';
+$string['webhookurl'] = 'URL do Webhook (FastAPI)';
+$string['jwtsecret'] = 'JWT Secret (Compartilhada)';
+$string['jwtsecret_desc'] = 'Chave secreta usada para assinar as requisições. Deve ser idêntica à definida no .env do FastAPI.';

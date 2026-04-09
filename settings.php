@@ -26,21 +26,27 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
     // Título da seção de configuração
-    $settings->add(new admin_setting_heading('block_openai_chat/headerconfig',
+    $settings->add(new admin_setting_heading(
+        'block_openai_chat/headerconfig',
         get_string('headerconfig', 'block_openai_chat'),
-        get_string('descconfig', 'block_openai_chat')));
+        get_string('descconfig', 'block_openai_chat')
+    ));
 
     // Campo 1: URL do Webhook do n8n
-    $settings->add(new admin_setting_configtext('block_openai_chat/webhookurl',
+    $settings->add(new admin_setting_configtext(
+        'block_openai_chat/webhookurl',
         'URL do Webhook (n8n)',
         'Cole aqui a URL do seu workflow (Production URL).',
         '', // Valor padrão vazio
-        PARAM_URL));
+        PARAM_URL
+    ));
 
-    // Campo 2: Token de Segurança (Opcional)
-    $settings->add(new admin_setting_configtext('block_openai_chat/securitytoken',
-        'Token de Segurança',
-        'Senha simples para validação no n8n.',
+    // Campo 2: JWT Secret (Chave Compartilhada)
+    $settings->add(new admin_setting_configtext(
+        'block_openai_chat/jwtsecret',
+        get_string('jwtsecret', 'block_openai_chat'),
+        get_string('jwtsecret_desc', 'block_openai_chat'),
         '',
-        PARAM_TEXT));
+        PARAM_RAW // PARAM_RAW para aceitar qualquer caractere da chave
+    ));
 }
