@@ -137,7 +137,10 @@ class chat extends \block_openai_chat\completion
             ],
 
             // O que ele estuda (Contexto Acadêmico Completo)
-            'student_enrollments' => $cursos_matriculados
+            'student_enrollments' => $cursos_matriculados,
+
+            // Histórico da Conversa
+            'history' => $this->history
         ];
 
         // =================================================================
