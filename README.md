@@ -50,7 +50,7 @@ Essa abordagem protege chaves de API e documentos proprietários contra acessos 
 ## 📂 Integração com o Backend
 
 Para o funcionamento pleno, o plugin deve estar conectado ao orquestrador dedicado:
-- **Repositório Backend**: [RAG Orchestrator Dashboard](file:///c:/Users/paulo.lima/Desktop/Projeto_RAG/README.md)
+- **Repositório Backend**: [Projeto FastAPI RAG](https://github.com/PauloLimafps/Projeto_FastAPI)
 
 ---
 *💡 Tecnologia focada no enriquecimento da experiência de aprendizado através de IA contextualizada.*
