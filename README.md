@@ -1,43 +1,56 @@
-# moodle-block_openai_chat
+# 🧩 Bloco de Chat com IA para Moodle (Versão RAG Orchestrator)
+
 <img align="right" src="https://github.com/Limekiller/moodle-block_openai_chat/assets/33644013/21f73adc-5bd4-4539-999b-a3b0a83736e0" />
 
-### Bloco de chat com IA para Moodle (Versão RAG Orchestrator / FastAPI)
-Este bloco permite que os usuários do seu Moodle obtenham suporte via chat 24/7. Esta versão atua como um conector (Thin Client), enviando as mensagens para um **Orquestrador RAG (FastAPI)** que processa a inteligência e consulta a base de conhecimento institucional.
+Este componente representa uma evolução técnica significativa do plugin `block_openai_chat`, convertendo a interface de chat em um **conector especializado para Retrieval-Augmented Generation (RAG)** dentro de um ecossistema Docker.
 
-A comunicação é protegida por **Autenticação JWT (HS256)**, garantindo que apenas requisições legítimas do seu Moodle sejam processadas.
+A solução opera como um **Thin Client**: a inteligência não é processada no servidor Moodle, mas sim delegada a um **Orquestrador FastAPI**, garantindo que o plugin gerencie apenas a interface, a segurança da sessão e o contexto educacional.
 
-# Configurações globais do bloco
-As configurações globais do bloco podem ser encontradas em *Administração do Site > Plugins > Blocos > OpenAI Chat Block*.
+---
 
-As principais opções são:
+## 🚀 Evoluções e Diferenciais Técnicos
 
-- **Webhook URL (FastAPI)**: A URL do endpoint `/chat` do seu orquestrador FastAPI (Ex: `http://sua-api.com/chat`).
-  
-- **JWT Secret (Chave Compartilhada)**: A chave secreta (HS256) usada para assinar digitalmente as requisições. **Importante**: Esta chave deve ser idêntica à definida no arquivo `.env` do seu servidor FastAPI.
+Esta versão foi redesenhada para suportar fluxos de trabalho corporativos e acadêmicos que exigem alta precisão e segurança.
 
-- **Restrict chat usage to logged-in users**: Se marcado, apenas usuários autenticados verão a interface de chat.
+### 1. Arquitetura de Segurança com JWT (HS256)
+- **Diferencial**: Diferente de implementações baseadas em tokens estáticos, esta versão utiliza **JSON Web Tokens**.
+- **Impacto**: Cada interação é assinada digitalmente, assegurando que apenas requisições originadas em instâncias autorizadas do Moodle sejam processadas pelo backend de IA.
 
-- **Assistant name / User name**: Nomes exibidos nos cabeçalhos da interface do chat para identificar a IA e o aluno.
+### 2. Enriquecimento de Contexto Operacional
+- **Diferencial**: Além da pergunta direta, o plugin extrai e envia metadados profundos da sessão do aluno.
+- **Impacto**: A IA recebe automaticamente o contexto do curso atual e a lista completa de matrículas do estudante, permitindo respostas personalizadas baseadas no perfil acadêmico real.
 
-- **Enable logging**: Grava o histórico de interações em *Administração do Site > Relatórios > OpenAI Chat Logs*.
+### 3. Conexão Nativa com Bases de Conhecimento
+- O design é otimizado para lidar com respostas estruturadas e extensas provenientes de buscas semânticas em documentos (PDFs, manuais e guias institucionais) armazenados no Weaviate.
 
-### Segurança e Autenticação (JWT)
-Diferente de versões anteriores que usavam tokens simples, esta versão implementa um fluxo de segurança robusto:
-1. O plugin gera um token **JWT (JSON Web Token)** assinado com a `JWT Secret`.
-2. O payload contém o `sub` (ID do usuário) e metadados de expiração.
-3. O FastAPI valida a assinatura antes de realizar qualquer busca semântica ou chamada de IA.
+---
 
-### Estrutura dos Dados (Payload)
-O plugin envia um objeto JSON rico para o orquestrador, permitindo uma resposta altamente contextualizada:
+## 🛠️ Parâmetros de Configuração
 
-- **Mensagem**: O texto digitado pelo aluno.
-- **Dados do Usuário**: ID, Nome Completo, Email e metadados de acesso.
-- **Contexto da Página**: ID e Nome do curso onde o aluno está no momento.
-- **Matrículas (Student Enrollments)**: Lista de todos os cursos onde o aluno está inscrito, ajudando a IA a entender o perfil acadêmico completo do usuário.
+As opções de ajuste estão disponíveis em: *Administração do Site > Plugins > Blocos > OpenAI Chat Block*.
 
-### Sobre o Processamento (RAG)
-Nesta arquitetura, o Moodle não sabe qual modelo de IA (GPT-4, Claude, etc.) está sendo usado. Toda a lógica de:
-- Recuperação de Documentos (RAG).
-- Memória de Curto Prazo (Histórico).
-- Filtros de Segurança.
-...é gerenciada exclusivamente pelo **Orquestrador Backend**. O plugin apenas exibe a resposta enviada pelo servidor.
+- **Webhook URL (Gateway)**: Endereço do endpoint de processamento (Ex: `http://api-ia-cluster:8000/chat`).
+- **JWT Secret**: Chave de segurança para assinatura das requisições. Deve haver paridade entre esta chave e a do arquivo `.env` no orquestrador.
+- **Nome do Assistente**: Identificação visual da IA na interface de chat.
+- **Logs de Suporte**: Registro das interações para monitoramento e análise pedagógica.
+
+---
+
+## 🔒 Fluxo de Comunicação e Segurança
+
+A estrutura remove a necessidade de conexão direta entre o Moodle e provedores de IA. O caminho percorrido pela informação é:
+1. O Moodle assina a mensagem com a `JWT_SECRET`.
+2. O Gateway (Traefik) valida a integridade do tráfego e protege a infraestrutura.
+3. O Backend valida a assinatura antes de autorizar qualquer consulta de dados ou chamada de modelo.
+
+Essa abordagem protege chaves de API e documentos proprietários contra acessos indevidos.
+
+---
+
+## 📂 Integração com o Backend
+
+Para o funcionamento pleno, o plugin deve estar conectado ao orquestrador dedicado:
+- **Repositório Backend**: [RAG Orchestrator Dashboard](file:///c:/Users/paulo.lima/Desktop/Projeto_RAG/README.md)
+
+---
+*💡 Tecnologia focada no enriquecimento da experiência de aprendizado através de IA contextualizada.*
