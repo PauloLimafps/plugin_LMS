@@ -49,4 +49,12 @@ if ($ADMIN->fulltree) {
         '',
         PARAM_RAW // PARAM_RAW para aceitar qualquer caractere da chave
     ));
+
+    // Campo 3: Habilitar Gravação de Logs (Tabela block_openai_chat_log)
+    $settings->add(new admin_setting_configcheckbox(
+        'block_openai_chat/logging',
+        'Habilitar Logs do Chatbot',
+        'Se ativado, salva as interações (perguntas e respostas) no banco de dados (mdl_block_openai_chat_log).',
+        1 // Valor padrão: 1 (Ativado)
+    ));
 }
