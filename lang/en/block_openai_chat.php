@@ -23,3 +23,6 @@ $string['jwtsecret_desc'] = 'Chave secreta compartilhada para segurança.';
 $string['admission_year_field'] = 'Campo: Ano de Ingresso';
 $string['admission_semester_field'] = 'Campo: Semestre de Ingresso';
 $string['current_period_field'] = 'Campo: Período Atual';
+$string['webhookurl_missing'] = 'Configure a URL do Orquestrador em Administração → Plugins → Blocos → Assistente RAG.';
+$string['defaultusername'] = 'Usuário';
+$string['defaultassistantname'] = 'Assistente';
