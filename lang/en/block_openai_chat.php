@@ -1,8 +1,8 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-$string['pluginname'] = 'Assistente RAG';
-$string['openai_chat'] = 'Assistente RAG';
+$string['pluginname'] = 'Assistente Inteligente';
+$string['openai_chat'] = 'Assistente Inteligente';
 $string['openai_chat:addinstance'] = 'Adicionar novo bloco do Assistente';
 $string['openai_chat:myaddinstance'] = 'Adicionar novo bloco do Assistente no Painel';
 
@@ -23,6 +23,6 @@ $string['jwtsecret_desc'] = 'Chave secreta compartilhada para segurança.';
 $string['admission_year_field'] = 'Campo: Ano de Ingresso';
 $string['admission_semester_field'] = 'Campo: Semestre de Ingresso';
 $string['current_period_field'] = 'Campo: Período Atual';
-$string['webhookurl_missing'] = 'Configure a URL do Orquestrador em Administração → Plugins → Blocos → Assistente RAG.';
+$string['webhookurl_missing'] = 'Configure a URL do Orquestrador em Administração → Plugins → Blocos → Assistente Inteligente.';
 $string['defaultusername'] = 'Usuário';
 $string['defaultassistantname'] = 'Assistente';
